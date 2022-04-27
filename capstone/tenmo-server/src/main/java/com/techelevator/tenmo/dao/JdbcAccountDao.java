@@ -73,6 +73,23 @@ public class JdbcAccountDao implements AccountDao
         return account;
     }
 
+    @Override
+    public Account getAccountByUser(Long userId)
+    {
+        String sql = "SELECT account_id " +
+                "FROM account " +
+                "WHERE user_id = ?;";
+
+        SqlRowSet row = jdbcTemplate.queryForRowSet(sql, userId);
+
+        Account account = null;
+        if(row.next())
+        {
+            account = mapRowToAccount(row);
+        }
+        return account;
+    }
+
 
     private Account mapRowToAccount(SqlRowSet row)
     {

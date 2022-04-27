@@ -13,4 +13,6 @@ public interface AccountDao
 
     Account getAccount(Long id);
 
+    Account getAccountByUser(Long userId);
+
 }
