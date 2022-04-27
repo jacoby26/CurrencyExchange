@@ -15,7 +15,6 @@ public class JdbcAccountDao implements AccountDao
 {
     private JdbcTemplate jdbcTemplate;
 
-    @Autowired
     public JdbcAccountDao(JdbcTemplate jdbcTemplate)
     {
         this.jdbcTemplate = jdbcTemplate;
@@ -25,8 +24,10 @@ public class JdbcAccountDao implements AccountDao
     public List<Account> accountList()
     {
         List<Account> accounts = new ArrayList<>();
-        String sql = "SELECT account_id\n" +
-                "FROM account;";
+        String sql = "SELECT account_id " +
+                ", user_id " +
+                ", balance " +
+                "FROM account ";
         SqlRowSet rows = jdbcTemplate.queryForRowSet(sql);
 
         while(rows.next())
@@ -38,15 +39,16 @@ public class JdbcAccountDao implements AccountDao
         return accounts;
     }
 
-
     @Override
-    public BigDecimal findBalance(Long id)
+    public BigDecimal findBalance(Long userId)
     {
         String sql = "SELECT balance " +
-                "FROM account " +
-                "WHERE account_id = ?;";
+                "FROM account as a " +
+                "JOIN tenmo_user as u " +
+                "ON u.user_id = a.user_id " +
+                "WHERE u.user_id = ?;";
 
-        SqlRowSet row = jdbcTemplate.queryForRowSet(sql, id);
+        SqlRowSet row = jdbcTemplate.queryForRowSet(sql, userId);
 
         BigDecimal balance = null;
         if(row.next())
@@ -60,6 +62,8 @@ public class JdbcAccountDao implements AccountDao
     public Account getAccount(Long id)
     {
         String sql = "SELECT account_id " +
+                ", user_id " +
+                ", balance " +
                 "FROM account " +
                 "WHERE account_id = ?;";
 
@@ -77,6 +81,8 @@ public class JdbcAccountDao implements AccountDao
     public Account getAccountByUser(Long userId)
     {
         String sql = "SELECT account_id " +
+                ", user_id " +
+                ", balance " +
                 "FROM account " +
                 "WHERE user_id = ?;";
 
@@ -89,7 +95,6 @@ public class JdbcAccountDao implements AccountDao
         }
         return account;
     }
-
 
     private Account mapRowToAccount(SqlRowSet row)
     {

@@ -11,10 +11,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.util.List;
 
 @RestController
-@PreAuthorize("IsAuthenticated()")
-@RequestMapping("account")
+//@PreAuthorize("IsAuthenticated()")
+//@RequestMapping("account")
 public class AccountController {
 
     UserDao userDao;
@@ -26,20 +27,27 @@ public class AccountController {
         this.accountDao = accountDao;
     }
 
-    @GetMapping()
+    @GetMapping("account/balance/{id}")
     public BigDecimal getBalance(@PathVariable Long id)
     {
         BigDecimal balance = accountDao.findBalance(id);
         return balance;
     }
 
-    @GetMapping()
-    public Account getAccount(Principal principal)
+    @GetMapping("account/user/{userId}")
+    public Account getAccount(@PathVariable Long userId)
     {
-        String user = principal.getName();
-        User accountId = userDao.findByUsername(user);
-        Account id = accountDao.getAccountByUser(accountId.getId());
+//    {
+//        String username = principal.getName();
+//        User user = userDao.findByUsername(username);
+        Account userAccount = accountDao.getAccountByUser(userId);
 
-        return id;
+        return userAccount;
+    }
+
+    @GetMapping(path = "/account")
+    public List<Account> listAccounts()
+    {
+        return accountDao.accountList();
     }
 }
