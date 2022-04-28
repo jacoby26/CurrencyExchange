@@ -96,21 +96,41 @@ public class App {
 	private void viewCurrentBalance() {
         AccountService view = new AccountService("http://localhost:8080/account/");
         BigDecimal balance = view.getBalance(currentUser);
-        System.out.println(balance);
+        System.out.println("Your current account balance is: $" + balance);
         //make UI option ^^
     }
 
 	private void viewTransferHistory() {
         TransferService transferService = new TransferService("http://localhost:8080/transfer/");
         List<Transfer> transfers = transferService.getHistory(currentUser);
-        for (Transfer transfer : transfers)
-        {
-            System.out.println(transfer.getTransferId());
+        Boolean isInList = false;
+        System.out.println("-------------------------------------------");
+        System.out.println("Transfers");
+        System.out.println("ID \t \t \t From/To \t \t \t Amount");
+        System.out.println("-------------------------------------------");
+        for (Transfer transfer : transfers) {
+            if (transfer.getTransferTypeId() == 1) {
+                System.out.println(transfer.getTransferId() + " \t \t From: " + transfer.getAccountFrom() + " \t \t $ " + transfer.getAmount());
+            } else {
+                System.out.println(transfer.getTransferId() + "\t \t To: " + transfer.getAccountTo() + " \t \t \t $ " + transfer.getAmount());
+            }
         }
+        System.out.println("-------------------------------------------");
+        long input = (long) consoleService.promptForInt("Please enter transfer ID to view details (0 to cancel): ");
         //make UI option ^^
-        viewTransferDetails(3003L);
-        //"Learn more about an
-	}
+        for (Transfer transfer : transfers) {
+            if (transfer.getTransferId() == input) {
+                isInList = true;
+                break;
+            }
+        }
+        if (transferService.getTransfer(input) != null && isInList)
+        {
+            viewTransferDetails(input);
+        } else {
+            System.out.println("Not a valid Transfer Id");
+        }
+    }
 
     private void viewTransferDetails(Long transferId)
     {
