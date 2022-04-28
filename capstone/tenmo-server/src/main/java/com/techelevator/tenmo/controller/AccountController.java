@@ -14,7 +14,7 @@ import java.security.Principal;
 import java.util.List;
 
 @RestController
-@PreAuthorize("IsAuthenticated()")
+@PreAuthorize("isAuthenticated()")
 //@RequestMapping("account")
 public class AccountController {
 

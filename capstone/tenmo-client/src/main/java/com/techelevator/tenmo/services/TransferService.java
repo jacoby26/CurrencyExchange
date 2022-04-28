@@ -67,27 +67,27 @@ public class TransferService extends ServiceBase<AuthenticatedUser>
         return transfer;
     }
 
-    public void makeTransfer(
-             Long transferId,
-             Long transferTypeId,
-             Long transferStatusId,
-             Long accountFrom,
-             Long accountTo,
-             BigDecimal amount
+    public void makeTransfer
+    (
+         Long transferTypeId,
+         Long transferStatusId,
+         Long accountFrom,
+         Long accountTo,
+         BigDecimal amount
     )
     {
-        Transfer transfer = new Transfer();
+        Transfer transfer = new Transfer(transferTypeId, transferStatusId, accountFrom, accountTo, amount);
 
         try
         {
-            String url = BASE_URL + transferId;
+            String url = BASE_URL;
 
-            /*HttpHeaders headers = new HttpHeaders();
+            HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(getAuthToken());
-            HttpEntity<Transfer> entity = new HttpEntity<> (headers);*/
+            HttpEntity<Transfer> entity = new HttpEntity<> (transfer, headers);
 
-            ResponseEntity<Void> response = restTemplate.postForEntity(url, getAuthEntity(), Void.class);
+            restTemplate.postForObject(url, entity, Void.class);
         }
         catch (RestClientException e)
         {

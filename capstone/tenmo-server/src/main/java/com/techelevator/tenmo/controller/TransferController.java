@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-//@PreAuthorize("IsAuthenticated()")
+@PreAuthorize("isAuthenticated()")
 public class TransferController
 {
     private TransferDao transferDao;
@@ -26,8 +26,8 @@ public class TransferController
     @GetMapping("transfer/user/{userId}")
     public List<Transfer> getAllTransfers(@PathVariable Long userId)
     {
-        List<Transfer> tranfers = transferDao.getAllTransfers(userId);
-        return tranfers;
+        List<Transfer> transfers = transferDao.getAllTransfers(userId);
+        return transfers;
     }
 
     @GetMapping("transfer/{transferId}")
@@ -52,14 +52,19 @@ public class TransferController
             canTransfer = false;
         }
 
-        if(canTransfer)
+        if(canTransfer && transferStatus == 2L)
         {
-            transferDao.create(transfer.getTransferId(),
-                    transfer.getTransferTypeId(),
-                    transferStatus,
+            transferDao.createSend(
                     transfer.getAccountFrom(),
                     transfer.getAccountTo(),
                     transfer.getAmount());
         }
+//        if(canTransfer && transferStatus == 1L)
+//        {
+//            transferDao.createSend(
+//                    transfer.getAccountFrom(),
+//                    transfer.getAccountTo(),
+//                    transfer.getAmount());
+//        }
     }
 }

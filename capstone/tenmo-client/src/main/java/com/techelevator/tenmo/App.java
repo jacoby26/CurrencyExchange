@@ -108,7 +108,7 @@ public class App {
             System.out.println(transfer.getTransferId());
         }
         //make UI option ^^
-        viewTransferDetails(1L);
+        viewTransferDetails(3003L);
         //"Learn more about an
 	}
 
@@ -127,12 +127,12 @@ public class App {
 
 	private void sendBucks() {
         TransferService transferService = new TransferService("http://localhost:8080/transfer/");
-        transferService.makeTransfer(3L, 2L, 2L, 2001L, 2003L, new BigDecimal("25.00"));
+        transferService.makeTransfer(2L,2L,2001L, 2002L, new BigDecimal("25.00"));
 	}
 
 	private void requestBucks() {
         TransferService transferService = new TransferService("http://localhost:8080/transfer/");
-        transferService.makeTransfer(4L, 1L, 1L, 2003L, 2001L, new BigDecimal("25.00"));
+        transferService.makeTransfer(1L,1L,2003L, 2001L, new BigDecimal("25.00"));
 	}
 
 }

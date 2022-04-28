@@ -5,6 +5,7 @@ import com.techelevator.tenmo.model.Transfer;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -135,7 +136,7 @@ public class JdbcTransferDao implements TransferDao
 
         SqlRowSet row = jdbcTemplate.queryForRowSet(sql, accountFrom);
 
-        Boolean accountFromValid = null;
+        Boolean accountFromValid = false;
         if(row.next())
         {
             balance = row.getBigDecimal("balance");
@@ -144,8 +145,8 @@ public class JdbcTransferDao implements TransferDao
 
         SqlRowSet row2 = jdbcTemplate.queryForRowSet(sql, accountTo);
 
-        Boolean accountToValid = null;
-        if(row.next())
+        Boolean accountToValid = false;
+        if(row2.next())
         {
             accountToValid = true;
         }
@@ -155,19 +156,69 @@ public class JdbcTransferDao implements TransferDao
         return distinctAccounts && accountFromValid && accountToValid && validAmount && validBalance;
     }
 
-    public void create
+    @Transactional
+    public void createSend
             (
-                    Long transferId,
-                    Long transferTypeId,
-                    Long transferStatusId,
+//                    Long transferId,
+//                    Long transferTypeId,
+//                    Long transferStatusId,
                     Long accountFrom,
                     Long accountTo,
                     BigDecimal amount
             )
     {
-        String sql = "INSERT INTO transfer(transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
-                " VALUES (?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, transferId, transferTypeId, transferStatusId, accountFrom, accountTo, amount);
+        String sql = "INSERT INTO transfer( transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
+                " VALUES ( 2, 2, ?, ?, ?)";
+        String sqlAccountFrom = "UPDATE account " +
+                "SET balance = balance - ? " +
+                "WHERE account_id = ?;";
+        String sqlAccountTo = "UPDATE account " +
+                "SET balance = balance + ? " +
+                "WHERE account_id = ?;";
+
+        jdbcTemplate.update(sql, accountFrom, accountTo, amount);
+        jdbcTemplate.update(sqlAccountFrom, amount, accountFrom);
+        jdbcTemplate.update(sqlAccountTo, amount, accountTo);
+    }
+
+    @Override
+    public void createRequest
+            (
+                    Long accountFrom,
+                    Long accountTo,
+                    BigDecimal amount
+            )
+    {
+        String sql = "INSERT INTO transfer( transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
+                " VALUES ( 1, 1, ?, ?, ?)";
+//        String sqlAccountFrom = "UPDATE account " +
+//                "SET balance = balance - ? " +
+//                "WHERE user_id = ?;";
+//        String sqlAccountTo = "UPDATE account " +
+//                "SET balance = balance + ? " +
+//                "WHERE user_id = ?;";
+
+        jdbcTemplate.update(sql, accountFrom, accountTo, amount);
+//        jdbcTemplate.update(sqlAccountFrom, amount, accountFrom);
+//        jdbcTemplate.update(sqlAccountTo, amount, accountFrom);
+    }
+
+    @Override
+    @Transactional
+    public void confirmRequest ( Transfer transfer )
+    {
+//        String sql = "INSERT INTO transfer( transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
+////                " VALUES ( 1, 1, ?, ?, ?)";
+        String sqlAccountFrom = "UPDATE account " +
+                "SET balance = balance - ? " +
+                "WHERE user_id = ?;";
+        String sqlAccountTo = "UPDATE account " +
+                "SET balance = balance + ? " +
+                "WHERE user_id = ?;";
+
+//        jdbcTemplate.update(sql, accountFrom, accountTo, amount);
+        jdbcTemplate.update(sqlAccountFrom, transfer.getAmount(), transfer.getAccountFrom());
+        jdbcTemplate.update(sqlAccountTo, transfer.getAmount(), transfer.getAccountTo());
     }
 
     private Transfer mapRowToTransfer(SqlRowSet row)

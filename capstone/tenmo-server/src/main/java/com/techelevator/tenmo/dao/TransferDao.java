@@ -13,14 +13,18 @@ public interface TransferDao
     public List<Transfer> getAllTransfersByType(Long userId, Long transferTypeId);
     public Boolean canTransfer(Long accountFrom, Long accountTo, BigDecimal amount);
     // can request transfer
-    public void create
+    public void createSend
     (
-            Long transferId,
-            Long transferTypeId,
-            Long transferStatusId,
             Long accountFrom,
             Long accountTo,
             BigDecimal amount
     );
+    public void createRequest
+    (
+            Long accountFrom,
+            Long accountTo,
+            BigDecimal amount
+    );
+    public void confirmRequest(Transfer transfer);
 
 }

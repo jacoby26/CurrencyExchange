@@ -22,6 +22,11 @@ public abstract class ServiceBase<T>
         ServiceBase.authToken = authToken;
     }
 
+    public static String getAuthToken()
+    {
+        return authToken;
+    }
+
     protected HttpEntity<Void> getAuthEntity()
     {
         HttpHeaders headers = new HttpHeaders();
