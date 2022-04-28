@@ -28,14 +28,51 @@ public class AccountService extends ServiceBase<AuthenticatedUser> {
 
         try
         {
-            String url = BASE_URL + "user";
-            ResponseEntity<Account> response = restTemplate.exchange(url, HttpMethod.GET, getAuthEntity(user), Account.class);
-            balance = response.getBody().getBalance();
+            String url2 = BASE_URL + "user/balance";
+            ResponseEntity<BigDecimal> response2 = restTemplate.exchange(url2, HttpMethod.GET, getAuthEntity(user), BigDecimal.class);
+
+            balance = response2.getBody();
         } catch (RestClientException e) {
             /*e.printStackTrace();*/
             BasicLogger.log(e.getMessage());
         }
         return balance;
+    }
+
+    public Long getAccountId(AuthenticatedUser user)
+    {
+        Long balance = null;
+
+        try
+        {
+            String url = BASE_URL + "user/account_id";
+            ResponseEntity<Long> response = restTemplate.exchange(url, HttpMethod.GET, getAuthEntity(user), Long.class);
+            balance = response.getBody();
+        } catch (RestClientException e) {
+            /*e.printStackTrace();*/
+            BasicLogger.log(e.getMessage());
+        }
+        return balance;
+    }
+
+    public String getUsername(Long accountId)
+    {
+        String username = null;
+
+        try
+        {
+            String url = BASE_URL + accountId;
+
+            ResponseEntity<AuthenticatedUser> response = restTemplate.exchange(url, HttpMethod.GET, getAuthEntity(), AuthenticatedUser.class);
+            username = response.getBody().getUser().getUsername();
+        }
+
+        catch (RestClientException e) {
+            /*e.printStackTrace();*/
+            BasicLogger.log(e.getMessage());
+        }
+
+        return username;
     }
 
     /*public Account getAccountByUserId(User user)

@@ -1,14 +1,12 @@
 package com.techelevator.tenmo;
 
-import com.techelevator.tenmo.model.Account;
-import com.techelevator.tenmo.model.AuthenticatedUser;
-import com.techelevator.tenmo.model.Transfer;
-import com.techelevator.tenmo.model.UserCredentials;
+import com.techelevator.tenmo.model.*;
 import com.techelevator.tenmo.services.*;
 
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.List;
+import java.util.Locale;
 
 public class App {
 
@@ -146,8 +144,44 @@ public class App {
 	}
 
 	private void sendBucks() {
+
+        UserService userService = new UserService("http://localhost:8080/user/");
+        AccountService accountService = new AccountService("http://localhost:8080/account/");
         TransferService transferService = new TransferService("http://localhost:8080/transfer/");
-        transferService.makeTransfer(2L,2L,2001L, 2002L, new BigDecimal("25.00"));
+
+        List<String> usernames = userService.getAllUsernames();
+
+        System.out.println("-------------------------------------------");
+        System.out.println("Make a transfer");
+        String username = consoleService.promptForString("Username of recipient (enter (s)how for available users): ");
+
+        if(username.toLowerCase().equals("s")) //display list of all users but logged in user
+        {
+            System.out.println("-------------------------------------------");
+            System.out.println("\nList of available users:");
+            for (String usernameOfUsernames : usernames)
+            {
+                System.out.println(usernameOfUsernames);
+            }
+            sendBucks();
+        }
+
+        BigDecimal amount = consoleService.promptForBigDecimal("Amount to send in dollars: ");
+        System.out.println("-------------------------------------------");
+
+
+        if(username.toLowerCase() == "s") //display list of all users but logged in user
+        {
+            for (String usernameOfUsernames : usernames)
+            {
+                System.out.println(username);
+            }
+            sendBucks();
+        }
+
+        Long accountTo = userService.getAccountId(username);
+        Long accountFrom = accountService.getAccountId(currentUser);
+        transferService.makeTransfer(2L,2L, accountFrom, accountTo, amount);
 	}
 
 	private void requestBucks() {

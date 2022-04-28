@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @PreAuthorize("isAuthenticated()")
+@RequestMapping("transfer")
 public class TransferController
 {
     private TransferDao transferDao;
@@ -23,14 +24,14 @@ public class TransferController
         this.userDao = userDao;
     }
 
-    @GetMapping("transfer/user/{userId}")
+    @GetMapping("user/{userId}")
     public List<Transfer> getAllTransfers(@PathVariable Long userId)
     {
         List<Transfer> transfers = transferDao.getAllTransfers(userId);
         return transfers;
     }
 
-    @GetMapping("transfer/{transferId}")
+    @GetMapping("{transferId}")
     public Transfer getTransferById(@PathVariable Long transferId)
     {
         Transfer tranfer = transferDao.getTransferById(transferId);
@@ -38,7 +39,7 @@ public class TransferController
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("transfer")
+    @PostMapping()
     public void transfer(@RequestBody Transfer transfer)
     {
         boolean canTransfer = transferDao.canTransfer(transfer.getAccountFrom()

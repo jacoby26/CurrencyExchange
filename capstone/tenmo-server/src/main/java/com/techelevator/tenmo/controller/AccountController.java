@@ -14,6 +14,7 @@ import java.security.Principal;
 import java.util.List;
 
 @RestController
+@RequestMapping("account")
 @PreAuthorize("isAuthenticated()")
 //@RequestMapping("account")
 public class AccountController {
@@ -34,7 +35,7 @@ public class AccountController {
         return balance;
     }*/
 
-    @GetMapping("account/user")
+    @GetMapping("user")
     public Account getAccount(Principal principal)
     {
         String username = principal.getName();
@@ -44,7 +45,34 @@ public class AccountController {
         return userAccount;
     }
 
-    @GetMapping(path = "/account")
+    @GetMapping("user/balance")
+    public BigDecimal getBalance(Principal principal)
+    {
+        String username = principal.getName();
+        User user = userDao.findByUsername(username);
+        Account userAccount = accountDao.getAccountByUser(user.getId());
+
+        return userAccount.getBalance();
+    }
+
+    @GetMapping("user/account_id")
+    public Long getAccountId(Principal principal)
+    {
+        String username = principal.getName();
+        User user = userDao.findByUsername(username);
+        Account userAccount = accountDao.getAccountByUser(user.getId());
+
+        return userAccount.getId();
+    }
+
+
+    @GetMapping("{account_id}")
+    public User getUser(@PathVariable Long accountId)
+    {
+        return userDao.findById(accountDao.getAccount(accountId).getUserId());
+    }
+
+    @GetMapping()
     public List<Account> listAccounts()
     {
         return accountDao.accountList();
