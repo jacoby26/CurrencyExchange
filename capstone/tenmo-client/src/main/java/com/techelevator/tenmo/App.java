@@ -2,13 +2,16 @@ package com.techelevator.tenmo;
 
 import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.AuthenticatedUser;
+import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.UserCredentials;
 import com.techelevator.tenmo.services.AccountService;
 import com.techelevator.tenmo.services.AuthenticationService;
 import com.techelevator.tenmo.services.ConsoleService;
+import com.techelevator.tenmo.services.TransferService;
 
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.util.List;
 
 public class App {
 
@@ -94,12 +97,30 @@ public class App {
         view.setAuthToken(currentUser.getToken());
         BigDecimal balance = view.getBalance(currentUser);
         System.out.println(balance);
+        //make UI option ^^
     }
 
 	private void viewTransferHistory() {
-		// TODO Auto-generated method stub
-		
+        TransferService transferService = new TransferService();
+        transferService.setAuthToken(currentUser.getToken());
+        List<Transfer> transfers = transferService.getHistory(currentUser);
+        for (Transfer transfer : transfers)
+        {
+            System.out.println(transfer.getTransferId());
+        }
+        //make UI option ^^
+        viewTransferDetails(1L);
+        //"Learn more about an
 	}
+
+    private void viewTransferDetails(Long transferId)
+    {
+        TransferService transferService = new TransferService();
+        transferService.setAuthToken(currentUser.getToken());
+        Transfer transfer = transferService.getTransfer(transferId);
+        System.out.println(transfer.toString());
+    }
+
 
 	private void viewPendingRequests() {
 		// TODO Auto-generated method stub
@@ -107,13 +128,15 @@ public class App {
 	}
 
 	private void sendBucks() {
-		// TODO Auto-generated method stub
-		
+        TransferService transferService = new TransferService();
+        transferService.setAuthToken(currentUser.getToken());
+        transferService.makeTransfer(3L, 2L, 2L, 2001L, 2003L, new BigDecimal("25.00"));
 	}
 
 	private void requestBucks() {
-		// TODO Auto-generated method stub
-		
+        TransferService transferService = new TransferService();
+        transferService.setAuthToken(currentUser.getToken());
+        transferService.makeTransfer(4L, 1L, 1L, 2003L, 2001L, new BigDecimal("25.00"));
 	}
 
 }

@@ -1,5 +1,6 @@
 package com.techelevator.tenmo.dao;
 
+import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Transfer;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -30,8 +31,8 @@ public class JdbcTransferDao implements TransferDao
                 ", t.account_to " +
                 ", t.amount " +
                 " FROM transfer AS t" +
-                " JOIN account AS a ON a.account_id = transfer.account_from " +
-                " AND a.account_id = transfer.account_to" +
+                " JOIN account AS a ON a.account_id = t.account_from " +
+                " OR a.account_id = t.account_to" +
                 " JOIN tenmo_user AS tu ON tu.user_id = a.user_id " +
                 " WHERE tu.user_id = ?;";
         SqlRowSet rows = jdbcTemplate.queryForRowSet(sql, userId);
@@ -46,7 +47,7 @@ public class JdbcTransferDao implements TransferDao
     }
 
     @Override
-    public Transfer getTransfersById(Long transferId)
+    public Transfer getTransferById(Long transferId)
     {
         String sql = "SELECT transfer_id " +
                 ", transfer_type_id " +
@@ -121,14 +122,52 @@ public class JdbcTransferDao implements TransferDao
     @Override
     public Boolean canTransfer(Long accountFrom, Long accountTo, BigDecimal amount)
     {
-        if (accountFrom == accountTo)
+        JdbcAccountDao jdbcAccountDao;
+        BigDecimal balance = null;
+        Boolean distinctAccounts = accountFrom != accountTo;
+        Boolean validAmount = amount.compareTo(BigDecimal.valueOf(0)) > 0;
+
+        String sql = "SELECT account_id " +
+                ", user_id " +
+                ", balance " +
+                "FROM account " +
+                "WHERE account_id = ?;";
+
+        SqlRowSet row = jdbcTemplate.queryForRowSet(sql, accountFrom);
+
+        Boolean accountFromValid = null;
+        if(row.next())
         {
-            ;
+            balance = row.getBigDecimal("balance");
+            accountFromValid = true;
         }
 
+        SqlRowSet row2 = jdbcTemplate.queryForRowSet(sql, accountTo);
 
+        Boolean accountToValid = null;
+        if(row.next())
+        {
+            accountToValid = true;
+        }
 
-        return null;
+        Boolean validBalance = amount.compareTo(balance) <= 0;
+
+        return distinctAccounts && accountFromValid && accountToValid && validAmount && validBalance;
+    }
+
+    public void create
+            (
+                    Long transferId,
+                    Long transferTypeId,
+                    Long transferStatusId,
+                    Long accountFrom,
+                    Long accountTo,
+                    BigDecimal amount
+            )
+    {
+        String sql = "INSERT INTO transfer(transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
+                " VALUES (?, ?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, transferId, transferTypeId, transferStatusId, accountFrom, accountTo, amount);
     }
 
     private Transfer mapRowToTransfer(SqlRowSet row)

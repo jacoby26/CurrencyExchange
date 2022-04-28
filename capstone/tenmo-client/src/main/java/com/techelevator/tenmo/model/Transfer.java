@@ -91,5 +91,17 @@ public class Transfer
         return "Rejected";
     }
 
+    @Override
+    public String toString()
+    {
+        return "User{" +
+                "transfer id=" + transferId +
+                ", transfer type=" + transferTypeId +
+                ", transfer status=" + transferStatusId +
+                ", account from='" + accountFrom +
+                ", account to='" + accountTo +
+                ", amount= $" + amount +
+                '}';
+    }
     //can transfer
 }

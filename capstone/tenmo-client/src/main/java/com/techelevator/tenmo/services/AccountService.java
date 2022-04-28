@@ -39,7 +39,6 @@ public class AccountService {
         } catch (RestClientException e) {
             /*e.printStackTrace();*/
             BasicLogger.log(e.getMessage());
-            System.out.println("check log for error");
         }
         return balance;
     }
@@ -63,7 +62,6 @@ public class AccountService {
         {
             /*e.printStackTrace();*/
             BasicLogger.log(e.getMessage());
-            System.out.println("account by user ID error");
         }
         return account;
     }
