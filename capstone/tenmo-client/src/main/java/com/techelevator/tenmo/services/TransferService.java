@@ -14,16 +14,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class TransferService
+public class TransferService extends ServiceBase<AuthenticatedUser>
 {
-    private static final String BASE_URL = "http://localhost:8080/";
-    private static final RestTemplate restTemplate = new RestTemplate();
 
-    private String authToken  = null;
-
-    public void setAuthToken(String authToken)
-    {
-        this.authToken = authToken;
+    public TransferService(String BASE_URL) {
+        super(BASE_URL);
     }
 
     public List<Transfer> getHistory(AuthenticatedUser user)
@@ -32,14 +27,14 @@ public class TransferService
 
         try
         {
-            String url = BASE_URL + "transfer/user/" + user.getUser().getId();
+            String url = BASE_URL + "user/" + user.getUser().getId();
 
-            HttpHeaders headers = new HttpHeaders();
+            /*HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(authToken);
-            HttpEntity<AuthenticatedUser> entity = new HttpEntity<> (user, headers);
+            headers.setBearerAuth(getAuthToken());
+            HttpEntity<AuthenticatedUser> entity = new HttpEntity<> (user, headers);*/
 
-            ResponseEntity<Transfer[]> response = restTemplate.exchange(url, HttpMethod.GET, entity, Transfer[].class);
+            ResponseEntity<Transfer[]> response = restTemplate.exchange(url, HttpMethod.GET, getAuthEntity(user), Transfer[].class);
             if (response.getBody() != null) history = Arrays.asList(response.getBody());
         }
         catch (RestClientException e)
@@ -55,14 +50,14 @@ public class TransferService
 
         try
         {
-            String url = BASE_URL + "transfer/" + transferId;
+            String url = BASE_URL + transferId;
 
-            HttpHeaders headers = new HttpHeaders();
+            /*HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(authToken);
-            HttpEntity<Transfer> entity = new HttpEntity<> (headers);
+            headers.setBearerAuth(getAuthToken());
+            HttpEntity<Transfer> entity = new HttpEntity<> (headers);*/
 
-            ResponseEntity<Transfer> response = restTemplate.exchange(url, HttpMethod.GET, entity, Transfer.class);
+            ResponseEntity<Transfer> response = restTemplate.exchange(url, HttpMethod.GET, getAuthEntity(), Transfer.class);
             transfer = response.getBody();
         }
         catch (RestClientException e)
@@ -85,14 +80,14 @@ public class TransferService
 
         try
         {
-            String url = BASE_URL + "transfer/" + transferId;
+            String url = BASE_URL + transferId;
 
-            HttpHeaders headers = new HttpHeaders();
+            /*HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(authToken);
-            HttpEntity<Transfer> entity = new HttpEntity<> (headers);
+            headers.setBearerAuth(getAuthToken());
+            HttpEntity<Transfer> entity = new HttpEntity<> (headers);*/
 
-            ResponseEntity<Void> response = restTemplate.postForEntity(url, entity, Void.class);
+            ResponseEntity<Void> response = restTemplate.postForEntity(url, getAuthEntity(), Void.class);
         }
         catch (RestClientException e)
         {

@@ -15,27 +15,22 @@ import java.math.BigDecimal;
 import java.security.Principal;
 import java.text.Bidi;
 
-public class AccountService {
+public class AccountService extends ServiceBase<AuthenticatedUser> {
 
-    private static final String BASE_URL = "http://localhost:8080/";
-    private static final RestTemplate restTemplate = new RestTemplate();
-
-    private String authToken  = null;
-
-    public void setAuthToken(String authToken)
-    {
-        this.authToken = authToken;
+    public AccountService(String BASE_URL) {
+        super(BASE_URL);
     }
+
 
     public BigDecimal getBalance(AuthenticatedUser user)
     {
-        BigDecimal balance = new BigDecimal("0.00");
+        BigDecimal balance = new BigDecimal(0);
 
         try
         {
-            String url = BASE_URL + "account/balance/" + user.getUser().getId();
-            ResponseEntity<BigDecimal> response = restTemplate.exchange(url, HttpMethod.GET, makeEntity(), BigDecimal.class);
-            balance = response.getBody();
+            String url = BASE_URL + "user";
+            ResponseEntity<Account> response = restTemplate.exchange(url, HttpMethod.GET, getAuthEntity(user), Account.class);
+            balance = response.getBody().getBalance();
         } catch (RestClientException e) {
             /*e.printStackTrace();*/
             BasicLogger.log(e.getMessage());
@@ -43,7 +38,7 @@ public class AccountService {
         return balance;
     }
 
-    public Account getAccountByUserId(User user)
+    /*public Account getAccountByUserId(User user)
     {
         Account account = new Account();
         try
@@ -52,7 +47,7 @@ public class AccountService {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(authToken);
+            headers.setBearerAuth(getAuthToken());
             HttpEntity<User> entity = new HttpEntity<> (user, headers);
 
             ResponseEntity<Account> response = restTemplate.exchange(url, HttpMethod.GET, entity, Account.class);
@@ -60,19 +55,19 @@ public class AccountService {
         }
         catch (RestClientException e)
         {
-            /*e.printStackTrace();*/
+            *//*e.printStackTrace();*//*
             BasicLogger.log(e.getMessage());
         }
         return account;
-    }
+    }*/
 
-    public HttpEntity makeEntity()
+    /*public HttpEntity makeEntity()
     {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(authToken);
-        HttpEntity<Void> entity = new HttpEntity<> (headers);
+        headers.setBearerAuth(getAuthToken());
+        HttpEntity<AuthenticatedUser> entity = new HttpEntity<> (headers, user);
         return entity;
-    }
+    }*/
 
 }

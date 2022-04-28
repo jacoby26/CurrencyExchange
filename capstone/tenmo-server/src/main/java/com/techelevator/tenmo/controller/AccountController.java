@@ -27,20 +27,19 @@ public class AccountController {
         this.accountDao = accountDao;
     }
 
-    @GetMapping("account/balance/{id}")
+   /* @GetMapping("account/balance/{id}")
     public BigDecimal getBalance(@PathVariable Long id)
     {
         BigDecimal balance = accountDao.findBalance(id);
         return balance;
-    }
+    }*/
 
-    @GetMapping("account/user/{userId}")
-    public Account getAccount(@PathVariable Long userId)
+    @GetMapping("account/user")
+    public Account getAccount(Principal principal)
     {
-//    {
-//        String username = principal.getName();
-//        User user = userDao.findByUsername(username);
-        Account userAccount = accountDao.getAccountByUser(userId);
+        String username = principal.getName();
+        User user = userDao.findByUsername(username);
+        Account userAccount = accountDao.getAccountByUser(user.getId());
 
         return userAccount;
     }
