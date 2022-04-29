@@ -159,9 +159,6 @@ public class JdbcTransferDao implements TransferDao
     @Transactional
     public void createSend
             (
-//                    Long transferId,
-//                    Long transferTypeId,
-//                    Long transferStatusId,
                     Long accountFrom,
                     Long accountTo,
                     BigDecimal amount
@@ -191,24 +188,19 @@ public class JdbcTransferDao implements TransferDao
     {
         String sql = "INSERT INTO transfer( transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
                 " VALUES ( 1, 1, ?, ?, ?)";
-//        String sqlAccountFrom = "UPDATE account " +
-//                "SET balance = balance - ? " +
-//                "WHERE user_id = ?;";
-//        String sqlAccountTo = "UPDATE account " +
-//                "SET balance = balance + ? " +
-//                "WHERE user_id = ?;";
+//
 
         jdbcTemplate.update(sql, accountFrom, accountTo, amount);
-//        jdbcTemplate.update(sqlAccountFrom, amount, accountFrom);
-//        jdbcTemplate.update(sqlAccountTo, amount, accountFrom);
     }
 
     @Override
     @Transactional
-    public void confirmRequest ( Transfer transfer )
+    public void confirmRequest (Transfer transfer)
     {
-//        String sql = "INSERT INTO transfer( transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
-////                " VALUES ( 1, 1, ?, ?, ?)";
+
+        String sql = "UPDATE transfer " +
+                "SET transfer_status = 2 " +
+                "WHERE transfer_id = ?;";
         String sqlAccountFrom = "UPDATE account " +
                 "SET balance = balance - ? " +
                 "WHERE user_id = ?;";
@@ -216,9 +208,20 @@ public class JdbcTransferDao implements TransferDao
                 "SET balance = balance + ? " +
                 "WHERE user_id = ?;";
 
-//        jdbcTemplate.update(sql, accountFrom, accountTo, amount);
+        jdbcTemplate.update(sql, transfer.getTransferId());
         jdbcTemplate.update(sqlAccountFrom, transfer.getAmount(), transfer.getAccountFrom());
         jdbcTemplate.update(sqlAccountTo, transfer.getAmount(), transfer.getAccountTo());
+    }
+
+    @Override
+    @Transactional
+    public void denyRequest (Long transferId)
+    {
+        String sql = "UPDATE transfer " +
+                "SET transfer_status = 3 " +
+                "WHERE transfer_id = ?;";
+
+        jdbcTemplate.update(sql, transferId);
     }
 
     private Transfer mapRowToTransfer(SqlRowSet row)

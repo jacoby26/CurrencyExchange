@@ -29,12 +29,25 @@ public class TransferService extends ServiceBase<AuthenticatedUser>
         {
             String url = BASE_URL + "user/" + user.getUser().getId();
 
-            /*HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(getAuthToken());
-            HttpEntity<AuthenticatedUser> entity = new HttpEntity<> (user, headers);*/
-
             ResponseEntity<Transfer[]> response = restTemplate.exchange(url, HttpMethod.GET, getAuthEntity(user), Transfer[].class);
+            if (response.getBody() != null) history = Arrays.asList(response.getBody());
+        }
+        catch (RestClientException e)
+        {
+            BasicLogger.log(e.getMessage());
+        }
+        return history;
+    }
+
+    public List<Transfer> getPendingRequests(AuthenticatedUser user)
+    {
+        List<Transfer> history = new ArrayList<>();
+
+        try
+        {
+            String url = BASE_URL + "requests/pending";
+
+            ResponseEntity<Transfer[]> response = restTemplate.exchange(url, HttpMethod.GET, getAuthEntity(), Transfer[].class);
             if (response.getBody() != null) history = Arrays.asList(response.getBody());
         }
         catch (RestClientException e)
@@ -51,11 +64,6 @@ public class TransferService extends ServiceBase<AuthenticatedUser>
         try
         {
             String url = BASE_URL + transferId;
-
-            /*HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(getAuthToken());
-            HttpEntity<Transfer> entity = new HttpEntity<> (headers);*/
 
             ResponseEntity<Transfer> response = restTemplate.exchange(url, HttpMethod.GET, getAuthEntity(), Transfer.class);
             transfer = response.getBody();
@@ -95,4 +103,46 @@ public class TransferService extends ServiceBase<AuthenticatedUser>
         }
     }
 
+
+    public void confirmRequest
+    (
+        Long transferTypeId,
+        Long transferStatusId,
+        Long accountFrom,
+        Long accountTo,
+        BigDecimal amount
+    )
+    {
+        Transfer transfer = new Transfer(transferTypeId, transferStatusId, accountFrom, accountTo, amount);
+
+        try
+        {
+            String url = BASE_URL + "request/confirm/";
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(getAuthToken());
+            HttpEntity<Transfer> entity = new HttpEntity<> (transfer, headers);
+
+            restTemplate.postForObject(url, entity, Void.class);
+        }
+        catch (RestClientException e)
+        {
+            BasicLogger.log(e.getMessage());
+        }
+    }
+
+    public void denyRequest(Long transferId)
+    {
+        try
+        {
+            String url = BASE_URL + "request/deny/" + transferId;
+
+            restTemplate.postForObject(url, getAuthEntity(), Void.class);
+        }
+        catch (RestClientException e)
+        {
+            BasicLogger.log(e.getMessage());
+        }
+    }
 }

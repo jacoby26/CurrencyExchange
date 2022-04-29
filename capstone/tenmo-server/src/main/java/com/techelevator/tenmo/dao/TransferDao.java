@@ -26,5 +26,6 @@ public interface TransferDao
             BigDecimal amount
     );
     public void confirmRequest(Transfer transfer);
+    public void denyRequest(Long transferId);
 
 }

@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -38,6 +40,46 @@ public class TransferController
         return tranfer;
     }
 
+    @GetMapping("/requests")
+    public List<Transfer> getAllRequests(Principal principal)
+    {
+        List<Transfer> requests = new ArrayList<>();
+        List<Transfer> transfers = transferDao.getAllTransfers(userDao.findByUsername(principal.getName()).getId());
+
+        for(Transfer transfer: transfers)
+        {
+            if (transfer.getTransferTypeId() == 1) requests.add(transfer);
+        }
+
+        return requests;
+    }
+
+    @GetMapping("/requests/pending")
+    public List<Transfer> getAllPendingRequests(Principal principal)
+    {
+        List<Transfer> requests = new ArrayList<>();
+        List<Transfer> transfers = transferDao.getAllTransfers(userDao.findByUsername(principal.getName()).getId());
+
+        for(Transfer transfer: transfers)
+        {
+            if (transfer.getTransferTypeId() == 1 && transfer.getTransferStatusId() == 1) requests.add(transfer);
+        }
+
+        return requests;
+    }
+
+    @PutMapping("/requests/confirm")
+    public void confirmRequest(@RequestBody Transfer transfer)
+    {
+        transferDao.confirmRequest(transfer);
+    }
+
+    @PutMapping("/requests/deny/{transferId}")
+    public void denyRequest(@PathVariable Long transferId)
+    {
+        transferDao.denyRequest(transferId);
+    }
+
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping()
     public void transfer(@RequestBody Transfer transfer)
@@ -63,12 +105,5 @@ public class TransferController
                     transfer.getAccountTo(),
                     transfer.getAmount());
         }
-//        if(canTransfer && transferStatus == 1L)
-//        {
-//            transferDao.createSend(
-//                    transfer.getAccountFrom(),
-//                    transfer.getAccountTo(),
-//                    transfer.getAmount());
-//        }
     }
 }

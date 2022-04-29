@@ -5,6 +5,7 @@ import com.techelevator.tenmo.services.*;
 
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -12,6 +13,9 @@ public class App {
 
     private static final String API_BASE_URL = "http://localhost:8080/";
 
+    UserService userService = new UserService("http://localhost:8080/user/");
+    AccountService accountService = new AccountService("http://localhost:8080/account/");
+    TransferService transferService = new TransferService("http://localhost:8080/transfer/");
     private final ConsoleService consoleService = new ConsoleService();
     private final AuthenticationService authenticationService = new AuthenticationService(API_BASE_URL);
     private ServiceBase serviceBase;
@@ -92,15 +96,12 @@ public class App {
     }
 
 	private void viewCurrentBalance() {
-        AccountService view = new AccountService("http://localhost:8080/account/");
-        BigDecimal balance = view.getBalance(currentUser);
+        BigDecimal balance = accountService.getBalance(currentUser);
         System.out.println("Your current account balance is: $" + balance);
         //make UI option ^^
     }
 
 	private void viewTransferHistory() {
-        AccountService accountService = new AccountService("http://localhost:8080/account/");
-        TransferService transferService = new TransferService("http://localhost:8080/transfer/");
         List<Transfer> transfers = transferService.getHistory(currentUser);
         Boolean isInList = false;
         System.out.println("-------------------------------------------");
@@ -136,8 +137,6 @@ public class App {
 
     private void viewTransferDetails(Long transferId)
     {
-        AccountService accountService = new AccountService(("http://localhost:8080/account/"));
-        TransferService transferService = new TransferService("http://localhost:8080/transfer/");
         Transfer transfer = transferService.getTransfer(transferId);
         System.out.println("--------------------------------------------");
         System.out.println("Transfer Details");
@@ -152,15 +151,94 @@ public class App {
 
 
 	private void viewPendingRequests() {
-		// TODO Auto-generated method stub
-		
+        Boolean isInList = false;
+
+        List<Transfer> requests = new ArrayList<>();
+        requests = transferService.getPendingRequests(currentUser);
+
+        System.out.println("request size: " + requests.size());
+        if(requests.size() == 0)
+        {
+            System.out.println("No pending requests...");
+            consoleService.pause();
+        }
+
+        System.out.println("-------------------------------------------");
+        System.out.println("Transfers");
+        System.out.println("ID \t \t \t From/To \t \t \t Amount");
+        System.out.println("-------------------------------------------");
+        for (Transfer transfer : requests)
+        {
+            if (!accountService.getUsername(transfer.getAccountFrom()).equals(currentUser.getUser().getUsername()))
+            {
+                System.out.println(transfer.getTransferId() + " \t \t From: " + accountService.getUsername(transfer.getAccountFrom()) + " \t \t $ " + transfer.getAmount());
+            }
+        }
+        System.out.println("-------------------------------------------");
+        long input = (long) consoleService.promptForInt("Please enter transfer ID to accept or deny request: ");
+
+
+        for (Transfer transfer : requests)
+        {
+            if (transfer.getTransferId() == input)
+            {
+                isInList = true;
+                break;
+            }
+        }
+        if (input == 0)
+        {
+            return;
+        }
+        else if (transferService.getTransfer(input) != null && isInList)
+        {
+            manageRequest(input);
+        }
+        else
+        {
+            System.out.println("Not a valid Transfer Id");
+        }
 	}
+
+    private void manageRequest(Long transferId)
+    {
+        viewTransferDetails(transferId);
+
+        String userDecision = consoleService.promptForString("Would you like to (a)ccept, (d)eny, or (i)gnore this request?");
+
+        Transfer transfer = transferService.getTransfer(transferId);
+
+        switch (userDecision.toLowerCase())
+        {
+            case "a":
+            case "accept":
+                transferService.confirmRequest
+                (
+                        1L
+                        , 2L
+                        , transfer.getAccountFrom()
+                        , transfer.getAccountTo()
+                        , transfer.getAmount()
+                );
+                break;
+            case "d":
+            case "deny":
+                transferService.denyRequest(transferId);
+                break;
+            case "i":
+            case "ignore":
+                break;
+            default:
+                System.out.println("Error - please enter a valid answer");
+                manageRequest(transferId);
+        }
+        consoleService.pause();
+
+    }
+
 
 	private void sendBucks() {
         BigDecimal amount = null;
-        UserService userService = new UserService("http://localhost:8080/user/");
-        AccountService accountService = new AccountService("http://localhost:8080/account/");
-        TransferService transferService = new TransferService("http://localhost:8080/transfer/");
 
         List<String> usernames = userService.getAllUsernames();
 
@@ -168,7 +246,7 @@ public class App {
         System.out.println("Make a transfer");
         String usernameInput = consoleService.promptForString("Username of recipient (enter (s)how for available users): ");
 
-        if(usernameInput.toLowerCase().equals("s")) //display list of all users but logged in user
+        if(usernameInput.toLowerCase().equals("s")|| usernameInput.toLowerCase().equals("show")) //display list of all users but logged in user
         {
             System.out.println("-------------------------------------------");
             System.out.println("\nList of available users:");
@@ -193,13 +271,42 @@ public class App {
             viewCurrentBalance();
         }
         return;
-
-
 	}
 
 	private void requestBucks() {
-        TransferService transferService = new TransferService("http://localhost:8080/transfer/");
-        transferService.makeTransfer(1L,1L,2003L, 2001L, new BigDecimal("25.00"));
-	}
+        BigDecimal amount = null;
+
+        List<String> usernames = userService.getAllUsernames();
+
+        System.out.println("-------------------------------------------");
+        System.out.println("Make a request");
+        String usernameInput = consoleService.promptForString("Username of recipient (enter (s)how for available users): ");
+
+        if(usernameInput.toLowerCase().equals("s") || usernameInput.toLowerCase().equals("show")) //display list of all users but logged in user
+        {
+            System.out.println("-------------------------------------------");
+            System.out.println("\nList of available users:");
+            for (String username : usernames)
+            {
+                if (!username.equals(currentUser.getUser().getUsername())) // need to exclude current user
+                {
+                    System.out.println(username);
+                }
+            }
+            System.out.println("");
+            requestBucks();
+        }
+
+        else
+        {
+            amount = consoleService.promptForBigDecimal("Amount to send (in decimal format): ");
+            System.out.println("-------------------------------------------");
+            Long accountTo = userService.getAccountId(usernameInput.trim());
+            Long accountFrom = accountService.getAccountId(currentUser);
+            transferService.makeTransfer(1L,1L, accountFrom, accountTo, amount);
+            viewCurrentBalance();
+        }
+        return;
+    }
 
 }
