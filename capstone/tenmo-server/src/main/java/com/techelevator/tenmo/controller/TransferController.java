@@ -47,10 +47,13 @@ public class TransferController
                 , transfer.getAmount());
         Long transferStatus = 2L;
 
-        if(transfer.getTransferTypeId() == 1)
+        if(canTransfer && transfer.getTransferTypeId() == 1)
         {
             transferStatus = 1L;
-            canTransfer = false;
+            transferDao.createRequest(
+                    transfer.getAccountFrom(),
+                    transfer.getAccountTo(),
+                    transfer.getAmount());
         }
 
         if(canTransfer && transferStatus == 2L)

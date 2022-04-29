@@ -66,7 +66,7 @@ public class AccountController {
     }
 
 
-    @GetMapping("{account_id}")
+    @GetMapping("{accountId}")
     public User getUser(@PathVariable Long accountId)
     {
         return userDao.findById(accountDao.getAccount(accountId).getUserId());

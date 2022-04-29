@@ -132,9 +132,18 @@ public class App {
 
     private void viewTransferDetails(Long transferId)
     {
+        AccountService accountService = new AccountService(("http://localhost:8080/account/"));
         TransferService transferService = new TransferService("http://localhost:8080/transfer/");
         Transfer transfer = transferService.getTransfer(transferId);
-        System.out.println(transfer.toString());
+        System.out.println("--------------------------------------------");
+        System.out.println("Transfer Details");
+        System.out.println("--------------------------------------------");
+        System.out.println("Id: " + transfer.getTransferId());
+        System.out.println("From: " + accountService.getUsername(transfer.getAccountFrom()));
+        System.out.println("To: " + accountService.getUsername(transfer.getAccountTo()));
+        System.out.println("Type: " + transfer.transferType());
+        System.out.println("Status: " + transfer.transferStatus());
+        System.out.println("Amount: $" + transfer.getAmount());
     }
 
 
@@ -153,33 +162,27 @@ public class App {
 
         System.out.println("-------------------------------------------");
         System.out.println("Make a transfer");
-        String username = consoleService.promptForString("Username of recipient (enter (s)how for available users): ");
+        String usernameInput = consoleService.promptForString("Username of recipient (enter (s)how for available users): ");
 
-        if(username.toLowerCase().equals("s")) //display list of all users but logged in user
+        if(usernameInput.toLowerCase().equals("s")) //display list of all users but logged in user
         {
             System.out.println("-------------------------------------------");
             System.out.println("\nList of available users:");
-            for (String usernameOfUsernames : usernames)
+            for (String username : usernames)
             {
-                System.out.println(usernameOfUsernames);
+                if (!username.equals(usernameInput)) // need to exclude current user
+                {
+                    System.out.println(username);
+                }
             }
+            System.out.println("");
             sendBucks();
         }
 
         BigDecimal amount = consoleService.promptForBigDecimal("Amount to send in dollars: ");
         System.out.println("-------------------------------------------");
 
-
-        if(username.toLowerCase() == "s") //display list of all users but logged in user
-        {
-            for (String usernameOfUsernames : usernames)
-            {
-                System.out.println(username);
-            }
-            sendBucks();
-        }
-
-        Long accountTo = userService.getAccountId(username);
+        Long accountTo = userService.getAccountId(usernameInput);
         Long accountFrom = accountService.getAccountId(currentUser);
         transferService.makeTransfer(2L,2L, accountFrom, accountTo, amount);
 	}
