@@ -99,6 +99,7 @@ public class App {
     }
 
 	private void viewTransferHistory() {
+        AccountService accountService = new AccountService("http://localhost:8080/account/");
         TransferService transferService = new TransferService("http://localhost:8080/transfer/");
         List<Transfer> transfers = transferService.getHistory(currentUser);
         Boolean isInList = false;
@@ -107,10 +108,10 @@ public class App {
         System.out.println("ID \t \t \t From/To \t \t \t Amount");
         System.out.println("-------------------------------------------");
         for (Transfer transfer : transfers) {
-            if (transfer.getTransferTypeId() == 1) {
-                System.out.println(transfer.getTransferId() + " \t \t From: " + transfer.getAccountFrom() + " \t \t $ " + transfer.getAmount());
+            if (!accountService.getUsername(transfer.getAccountFrom()).equals(currentUser.getUser().getUsername())) {
+                System.out.println(transfer.getTransferId() + " \t \t From: " + accountService.getUsername(transfer.getAccountFrom()) + " \t \t $ " + transfer.getAmount());
             } else {
-                System.out.println(transfer.getTransferId() + "\t \t To: " + transfer.getAccountTo() + " \t \t \t $ " + transfer.getAmount());
+                System.out.println(transfer.getTransferId() + "\t \t To: " + accountService.getUsername(transfer.getAccountTo()) + " \t \t \t $ " + transfer.getAmount());
             }
         }
         System.out.println("-------------------------------------------");
@@ -122,7 +123,10 @@ public class App {
                 break;
             }
         }
-        if (transferService.getTransfer(input) != null && isInList)
+        if (input == 0) {
+           return;
+        }
+        else if (transferService.getTransfer(input) != null && isInList)
         {
             viewTransferDetails(input);
         } else {
@@ -183,12 +187,14 @@ public class App {
         {
             amount = consoleService.promptForBigDecimal("Amount to send (in decimal format): ");
             System.out.println("-------------------------------------------");
+            Long accountTo = userService.getAccountId(usernameInput.trim());
+            Long accountFrom = accountService.getAccountId(currentUser);
+            transferService.makeTransfer(2L,2L, accountFrom, accountTo, amount);
+            viewCurrentBalance();
         }
+        return;
 
-        Long accountTo = userService.getAccountId(usernameInput);
-        Long accountFrom = accountService.getAccountId(currentUser);
-        transferService.makeTransfer(2L,2L, accountFrom, accountTo, amount);
-        viewCurrentBalance();
+
 	}
 
 	private void requestBucks() {
