@@ -153,7 +153,7 @@ public class App {
 	}
 
 	private void sendBucks() {
-
+        BigDecimal amount = null;
         UserService userService = new UserService("http://localhost:8080/user/");
         AccountService accountService = new AccountService("http://localhost:8080/account/");
         TransferService transferService = new TransferService("http://localhost:8080/transfer/");
@@ -170,7 +170,7 @@ public class App {
             System.out.println("\nList of available users:");
             for (String username : usernames)
             {
-                if (!username.equals(usernameInput)) // need to exclude current user
+                if (!username.equals(currentUser.getUser().getUsername())) // need to exclude current user
                 {
                     System.out.println(username);
                 }
@@ -179,12 +179,16 @@ public class App {
             sendBucks();
         }
 
-        BigDecimal amount = consoleService.promptForBigDecimal("Amount to send in dollars: ");
-        System.out.println("-------------------------------------------");
+        else
+        {
+            amount = consoleService.promptForBigDecimal("Amount to send (in decimal format): ");
+            System.out.println("-------------------------------------------");
+        }
 
         Long accountTo = userService.getAccountId(usernameInput);
         Long accountFrom = accountService.getAccountId(currentUser);
         transferService.makeTransfer(2L,2L, accountFrom, accountTo, amount);
+        viewCurrentBalance();
 	}
 
 	private void requestBucks() {

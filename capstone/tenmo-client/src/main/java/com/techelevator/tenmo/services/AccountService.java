@@ -61,10 +61,10 @@ public class AccountService extends ServiceBase<AuthenticatedUser> {
 
         try
         {
-            String url = BASE_URL + accountId;
+            String url = BASE_URL + "user/username/" + accountId ;
 
-            ResponseEntity<AuthenticatedUser> response = restTemplate.exchange(url, HttpMethod.GET, getAuthEntity(), AuthenticatedUser.class);
-            username = response.getBody().getUser().getUsername();
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, getAuthEntity(), String.class);
+            username = response.getBody();
         }
 
         catch (RestClientException e) {
