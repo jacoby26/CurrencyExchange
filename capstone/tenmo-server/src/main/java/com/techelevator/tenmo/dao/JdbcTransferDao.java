@@ -199,18 +199,19 @@ public class JdbcTransferDao implements TransferDao
     {
 
         String sql = "UPDATE transfer " +
-                "SET transfer_status = 2 " +
+                "SET transfer_status_id = 2 " +
                 "WHERE transfer_id = ?;";
         String sqlAccountFrom = "UPDATE account " +
                 "SET balance = balance - ? " +
-                "WHERE user_id = ?;";
+                "WHERE account_id = ?;";
         String sqlAccountTo = "UPDATE account " +
                 "SET balance = balance + ? " +
-                "WHERE user_id = ?;";
+                "WHERE account_id = ?;";
 
+
+        jdbcTemplate.update(sqlAccountFrom, transfer.getAmount(), transfer.getAccountTo());
+        jdbcTemplate.update(sqlAccountTo, transfer.getAmount(), transfer.getAccountFrom());
         jdbcTemplate.update(sql, transfer.getTransferId());
-        jdbcTemplate.update(sqlAccountFrom, transfer.getAmount(), transfer.getAccountFrom());
-        jdbcTemplate.update(sqlAccountTo, transfer.getAmount(), transfer.getAccountTo());
     }
 
     @Override
@@ -218,7 +219,7 @@ public class JdbcTransferDao implements TransferDao
     public void denyRequest (Long transferId)
     {
         String sql = "UPDATE transfer " +
-                "SET transfer_status = 3 " +
+                "SET transfer_status_id = 3 " +
                 "WHERE transfer_id = ?;";
 
         jdbcTemplate.update(sql, transferId);

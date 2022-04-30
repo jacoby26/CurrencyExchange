@@ -30,7 +30,7 @@ public class UserService extends ServiceBase<AuthenticatedUser>
             accountId = response.getBody().getId();
         }
 
-        catch (RestClientException e) {
+        catch (RestClientException | NullPointerException e) {
             /*e.printStackTrace();*/
             BasicLogger.log(e.getMessage());
         }
@@ -50,7 +50,7 @@ public class UserService extends ServiceBase<AuthenticatedUser>
             if (response.getBody() != null) usernames = Arrays.asList(response.getBody());
         }
 
-        catch (RestClientException e) {
+        catch (RestClientException | NullPointerException e) {
             /*e.printStackTrace();*/
             BasicLogger.log(e.getMessage());
         }

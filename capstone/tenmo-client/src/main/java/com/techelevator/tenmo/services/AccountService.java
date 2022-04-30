@@ -32,7 +32,7 @@ public class AccountService extends ServiceBase<AuthenticatedUser> {
             ResponseEntity<BigDecimal> response2 = restTemplate.exchange(url2, HttpMethod.GET, getAuthEntity(user), BigDecimal.class);
 
             balance = response2.getBody();
-        } catch (RestClientException e) {
+        } catch (RestClientException | NullPointerException e) {
             /*e.printStackTrace();*/
             BasicLogger.log(e.getMessage());
         }
@@ -48,7 +48,7 @@ public class AccountService extends ServiceBase<AuthenticatedUser> {
             String url = BASE_URL + "user/account_id";
             ResponseEntity<Long> response = restTemplate.exchange(url, HttpMethod.GET, getAuthEntity(user), Long.class);
             balance = response.getBody();
-        } catch (RestClientException e) {
+        } catch (RestClientException | NullPointerException e) {
             /*e.printStackTrace();*/
             BasicLogger.log(e.getMessage());
         }
@@ -67,44 +67,12 @@ public class AccountService extends ServiceBase<AuthenticatedUser> {
             username = response.getBody();
         }
 
-        catch (RestClientException e) {
+        catch (RestClientException | NullPointerException e) {
             /*e.printStackTrace();*/
             BasicLogger.log(e.getMessage());
         }
 
         return username;
     }
-
-    /*public Account getAccountByUserId(User user)
-    {
-        Account account = new Account();
-        try
-        {
-            String url = BASE_URL + "account/user/";
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(getAuthToken());
-            HttpEntity<User> entity = new HttpEntity<> (user, headers);
-
-            ResponseEntity<Account> response = restTemplate.exchange(url, HttpMethod.GET, entity, Account.class);
-            account = response.getBody();
-        }
-        catch (RestClientException e)
-        {
-            *//*e.printStackTrace();*//*
-            BasicLogger.log(e.getMessage());
-        }
-        return account;
-    }*/
-
-    /*public HttpEntity makeEntity()
-    {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(getAuthToken());
-        HttpEntity<AuthenticatedUser> entity = new HttpEntity<> (headers, user);
-        return entity;
-    }*/
 
 }

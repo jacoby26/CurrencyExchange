@@ -32,14 +32,14 @@ public class TransferService extends ServiceBase<AuthenticatedUser>
             ResponseEntity<Transfer[]> response = restTemplate.exchange(url, HttpMethod.GET, getAuthEntity(user), Transfer[].class);
             if (response.getBody() != null) history = Arrays.asList(response.getBody());
         }
-        catch (RestClientException e)
+        catch (RestClientException | NullPointerException e)
         {
             BasicLogger.log(e.getMessage());
         }
         return history;
     }
 
-    public List<Transfer> getPendingRequests(AuthenticatedUser user)
+    public List<Transfer> getRelevantPendingRequests(AuthenticatedUser user)
     {
         List<Transfer> history = new ArrayList<>();
 
@@ -50,7 +50,7 @@ public class TransferService extends ServiceBase<AuthenticatedUser>
             ResponseEntity<Transfer[]> response = restTemplate.exchange(url, HttpMethod.GET, getAuthEntity(), Transfer[].class);
             if (response.getBody() != null) history = Arrays.asList(response.getBody());
         }
-        catch (RestClientException e)
+        catch (RestClientException | NullPointerException e)
         {
             BasicLogger.log(e.getMessage());
         }
@@ -68,7 +68,7 @@ public class TransferService extends ServiceBase<AuthenticatedUser>
             ResponseEntity<Transfer> response = restTemplate.exchange(url, HttpMethod.GET, getAuthEntity(), Transfer.class);
             transfer = response.getBody();
         }
-        catch (RestClientException e)
+        catch (RestClientException | NullPointerException e)
         {
             BasicLogger.log(e.getMessage());
         }
@@ -97,36 +97,27 @@ public class TransferService extends ServiceBase<AuthenticatedUser>
 
             restTemplate.postForObject(url, entity, Void.class);
         }
-        catch (RestClientException e)
+        catch (RestClientException | NullPointerException e)
         {
             BasicLogger.log(e.getMessage());
         }
     }
 
 
-    public void confirmRequest
-    (
-        Long transferTypeId,
-        Long transferStatusId,
-        Long accountFrom,
-        Long accountTo,
-        BigDecimal amount
-    )
+    public void confirmRequest(Transfer transfer)
     {
-        Transfer transfer = new Transfer(transferTypeId, transferStatusId, accountFrom, accountTo, amount);
-
         try
         {
-            String url = BASE_URL + "request/confirm/";
+            String url = BASE_URL + "requests/confirm/";
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(getAuthToken());
             HttpEntity<Transfer> entity = new HttpEntity<> (transfer, headers);
 
-            restTemplate.postForObject(url, entity, Void.class);
+            restTemplate.exchange(url, HttpMethod.PUT, entity, Void.class);
         }
-        catch (RestClientException e)
+        catch (RestClientException | NullPointerException e)
         {
             BasicLogger.log(e.getMessage());
         }
@@ -136,11 +127,11 @@ public class TransferService extends ServiceBase<AuthenticatedUser>
     {
         try
         {
-            String url = BASE_URL + "request/deny/" + transferId;
+            String url = BASE_URL + "requests/deny/" + transferId;
 
-            restTemplate.postForObject(url, getAuthEntity(), Void.class);
+            restTemplate.exchange(url, HttpMethod.PUT, getAuthEntity(), Void.class);
         }
-        catch (RestClientException e)
+        catch (RestClientException | NullPointerException e)
         {
             BasicLogger.log(e.getMessage());
         }

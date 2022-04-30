@@ -154,13 +154,12 @@ public class App {
         Boolean isInList = false;
 
         List<Transfer> requests = new ArrayList<>();
-        requests = transferService.getPendingRequests(currentUser);
+        requests = transferService.getRelevantPendingRequests(currentUser);
 
-        System.out.println("request size: " + requests.size());
         if(requests.size() == 0)
         {
             System.out.println("No pending requests...");
-            consoleService.pause();
+            return;
         }
 
         System.out.println("-------------------------------------------");
@@ -214,11 +213,7 @@ public class App {
             case "accept":
                 transferService.confirmRequest
                 (
-                        1L
-                        , 2L
-                        , transfer.getAccountFrom()
-                        , transfer.getAccountTo()
-                        , transfer.getAmount()
+                        transfer
                 );
                 break;
             case "d":
@@ -232,8 +227,6 @@ public class App {
                 System.out.println("Error - please enter a valid answer");
                 manageRequest(transferId);
         }
-        consoleService.pause();
-
     }
 
 
