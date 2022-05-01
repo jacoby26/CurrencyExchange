@@ -7,18 +7,21 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class JdbcTransferDao implements TransferDao
 {
     private JdbcTemplate jdbcTemplate;
 
-    public JdbcTransferDao(JdbcTemplate jdbcTemplate)
+    public JdbcTransferDao(DataSource dataSource)
     {
-        this.jdbcTemplate = jdbcTemplate;
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     @Override
@@ -125,7 +128,7 @@ public class JdbcTransferDao implements TransferDao
     {
         JdbcAccountDao jdbcAccountDao;
         BigDecimal balance = null;
-        Boolean distinctAccounts = accountFrom != accountTo;
+        Boolean distinctAccounts = !Objects.equals(accountFrom, accountTo);
         Boolean validAmount = amount.compareTo(BigDecimal.valueOf(0)) > 0;
 
         String sql = "SELECT account_id " +

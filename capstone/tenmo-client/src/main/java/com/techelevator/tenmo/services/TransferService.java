@@ -95,7 +95,8 @@ public class TransferService extends ServiceBase<AuthenticatedUser>
             headers.setBearerAuth(getAuthToken());
             HttpEntity<Transfer> entity = new HttpEntity<> (transfer, headers);
 
-            restTemplate.postForObject(url, entity, Void.class);
+            restTemplate.
+                    postForObject(url, entity, Void.class);
         }
         catch (RestClientException | NullPointerException e)
         {

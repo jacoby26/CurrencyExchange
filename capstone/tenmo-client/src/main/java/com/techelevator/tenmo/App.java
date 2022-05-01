@@ -110,9 +110,13 @@ public class App {
         System.out.println("-------------------------------------------");
         for (Transfer transfer : transfers) {
             if (!accountService.getUsername(transfer.getAccountFrom()).equals(currentUser.getUser().getUsername())) {
-                System.out.println(transfer.getTransferId() + " \t \t From: " + accountService.getUsername(transfer.getAccountFrom()) + " \t \t $ " + transfer.getAmount());
+                if (transfer.getTransferStatusId().equals(2L)) {
+                    System.out.println(transfer.getTransferId() + " \t \t From: " + accountService.getUsername(transfer.getAccountFrom()) + " \t \t $ " + transfer.getAmount());
+                }
             } else {
-                System.out.println(transfer.getTransferId() + "\t \t To: " + accountService.getUsername(transfer.getAccountTo()) + " \t \t \t $ " + transfer.getAmount());
+                if (transfer.getTransferStatusId().equals(2L)) {
+                    System.out.println(transfer.getTransferId() + "\t \t To: " + accountService.getUsername(transfer.getAccountTo()) + " \t \t \t $ " + transfer.getAmount());
+                }
             }
         }
         System.out.println("-------------------------------------------");
@@ -203,7 +207,7 @@ public class App {
     {
         viewTransferDetails(transferId);
 
-        String userDecision = consoleService.promptForString("Would you like to (a)ccept, (d)eny, or (i)gnore this request?");
+        String userDecision = consoleService.promptForString("Would you like to (a)ccept, (d)eny, or (i)gnore this request? ");
 
         Transfer transfer = transferService.getTransfer(transferId);
 
@@ -239,7 +243,11 @@ public class App {
         System.out.println("Make a transfer");
         String usernameInput = consoleService.promptForString("Username of recipient (enter (s)how for available users): ");
 
-        if(usernameInput.toLowerCase().equals("s")|| usernameInput.toLowerCase().equals("show")) //display list of all users but logged in user
+
+        if (!usernames.contains(usernameInput) || usernameInput.equals(currentUser.getUser().getUsername())) {
+            System.out.println("Not a valid user, unable to process request");
+        }
+        else if(usernameInput.toLowerCase().equals("s")|| usernameInput.toLowerCase().equals("show")) //display list of all users but logged in user
         {
             System.out.println("-------------------------------------------");
             System.out.println("\nList of available users:");
@@ -260,8 +268,13 @@ public class App {
             System.out.println("-------------------------------------------");
             Long accountTo = userService.getAccountId(usernameInput.trim());
             Long accountFrom = accountService.getAccountId(currentUser);
-            transferService.makeTransfer(2L,2L, accountFrom, accountTo, amount);
-            viewCurrentBalance();
+            if (amount.compareTo(accountService.getBalance(currentUser)) <= 0) {
+                transferService.makeTransfer(2L,2L, accountFrom, accountTo, amount);
+                viewCurrentBalance();
+            }
+            else {
+                System.out.println("Invalid transfer amount, not enough money");
+            }
         }
         return;
 	}
@@ -297,6 +310,7 @@ public class App {
             Long accountTo = userService.getAccountId(usernameInput.trim());
             Long accountFrom = accountService.getAccountId(currentUser);
             transferService.makeTransfer(1L,1L, accountFrom, accountTo, amount);
+            System.out.println("Your transfer request is pending.");
             viewCurrentBalance();
         }
         return;
