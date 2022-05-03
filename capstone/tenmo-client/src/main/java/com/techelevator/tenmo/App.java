@@ -244,10 +244,8 @@ public class App {
         String usernameInput = consoleService.promptForString("Username of recipient (enter (s)how for available users): ");
 
 
-        if (!usernames.contains(usernameInput) || usernameInput.equals(currentUser.getUser().getUsername())) {
-            System.out.println("Not a valid user, unable to process request");
-        }
-        else if(usernameInput.toLowerCase().equals("s")|| usernameInput.toLowerCase().equals("show")) //display list of all users but logged in user
+
+       if(usernameInput.toLowerCase().equals("s")|| usernameInput.toLowerCase().equals("show")) //display list of all users but logged in user
         {
             System.out.println("-------------------------------------------");
             System.out.println("\nList of available users:");
@@ -261,6 +259,9 @@ public class App {
             System.out.println("");
             sendBucks();
         }
+       else if (!usernames.contains(usernameInput) || usernameInput.equals(currentUser.getUser().getUsername())) {
+           System.out.println("Not a valid user, unable to process request");
+       }
 
         else
         {
